@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Document Object Model</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="script" type="text/javascript" href="sketch.js">
+  </head>
+
+  <body>
+    <div id = "wrapperDiv">
+      <img src="images/bullets/b0.png">
+    </div>
+
+    <script>
+
+    recursive_thing(document,"")
+
+    function recursive_thing(thing,level) {
+      var node=thing
+      var level=level+" "
+      console.log(`${level}${node} ${node.nodeName}`)
+      if (node.nodeValue != null){
+        console.log(`value=${node.nodeValue}`)
+      }
+      if (node.hasAttributes){
+        for (var i=0;i<node.attributes.length;i++)
+        console.log(`${level}${node.attributes[i].name}=${node.attributes[i].value}`)
+      }
+      if (node.hasChildNodes()){
+        var children = node.childNodes
+        for (var i=0;i<children.length;i++)
+        recursive_thing(children[i],level+" ")
+      }
+    }
+    //---------------------------------------------------------
+    function makeHtml(numInfo,numMenu) {
+       mouseX=0
+       mouseY=0
+       button=0
+       selected=null
+      wrapper=document.getElementById("wrapperDiv")
+      game=document.createElement("div")
+      game.style.position="absolute"
+      game.style.top="10px"
+      game.style.left="20%"
+      game.style.width="1100px"
+      game.style.height="1100px"
+      bimage=[]
+      towimage=[]
+      dimage=[]
+      dimagediv=[]
+      for(var i=0;i<5;i++){
+        bimage[i]=document.createElement("img")
+        bimage[i].src="images/bullets/b"+i+".png"
+
+        towimage[i]=document.createElement("img")
+        towimage[i].src="images/towers/d"+i+".png"
+        dimage[i]=document.createElement("img")
+        dimage[i].src="images/towers/tow"+i+".png"
+        dimage[i].style.position="absolute"
+        dimage[i].style.left="0px"
+        dimage[i].style.top="0px"
+        dimage[i].x=0
+        dimage[i].y=0
+        dimage[i].draggable=false
+
+
+      }
+
+
+      infoDiv=document.createElement("div")
+      infoDiv.setAttribute("id","infoDiv")
+      infoDiv.style.position="relative"
+      infoDiv.style.left=0+"%"
+      infoDiv.style.top=0+"px"
+      infoDiv.style.width=1100+"px"
+      infoDiv.style.height=100+"px"
+      infoDiv.style.background="black"
+
+      infoTile=[]
+      for (var i=0;i<numInfo; i++){
+        infoTile[i]=document.createElement("div")
+        infoTile[i].setAttribute("id","infoTile"+i)
+        infoTile[i].style.float="left"
+        infoTile[i].style.top=5+"%"
+        infoTile[i].style.left=5+"%"
+        infoTile[i].style.width=30+"%"
+        infoTile[i].style.height=90+"%"
+
+        infoTile[i].style.background="pink"
+        infoTile[i].addEventListener("mouseover",mouseovermenu, false)
+        infoTile[i].addEventListener("mouseout",mouseoutmenu, false)
+        //infoTile[i].addEventListener("load",recursive_thing,false)
+
+        console.log(infoTile[i].eventListener)
+
+        infoTile[i].style.position="relative"
+        infoDiv.appendChild(infoTile[i])
+
+      }
+      can=document.createElement("canvas")
+      can.setAttribute("width",1000)
+      can.setAttribute("height",1000)
+      can.style.position="relative"
+      can.style.left=0+"px"
+      can.style.top=0+"px"
+      can.style.float="left"
+
+      ctx=can.getContext('2d')
+      can.draw= function() {
+        ctx.drawimage()
+
+
+      }
+      menuDiv=document.createElement("div")
+      menuDiv.setAttribute("id","menuDiv")
+      menuDiv.style.position="relative"
+      menuDiv.style.top=0+"px"
+      menuDiv.style.left=0+"px"
+      menuDiv.style.float="right"
+      menuDiv.style.width=100+"px"
+      menuDiv.style.height=1000+"px"
+      menuDiv.style.position="relative"
+      menuDiv.style.background="black"
+      menuTile=[]
+      for (var i=0;i<numMenu; i++){
+        menuTile[i]=document.createElement("div")
+        menuTile[i].setAttribute("id","menuTile"+i)
+        menuDiv.appendChild(menuTile[i])
+        menuTile[i].addEventListener("mouseover",mouseovermenu, false)
+        menuTile[i].addEventListener("mouseout",mouseoutmenu, false)
+        menuTile[i].addEventListener("mousedown",dragonclicked,false)
+        menuTile[i].addEventListener("mouseup",dragonlifted, false)
+        menuTile[i].index=i
+        menuTile[i].style.top=5+"%"
+        menuTile[i].style.left=3+"%"
+        menuTile[i].style.width=90+"%"
+        menuTile[i].style.height=10+"%"
+        menuTile[i].style.position="relative"
+        menuTile[i].style.background="pink"
+        menuTile[i].child=towimage[i]
+        menuTile[i].appendChild(dimage[i])
+      }
+      mouseDiv = document.createElement("div")
+      mouseDiv.setAttribute("id","mouseDiv")
+      mouseDiv.style.position="absolute"
+      mouseDiv.style.height="100px"
+      mouseDiv.style.width="100px"
+      mouseDiv.style.top="100px"
+      mouseDiv.style.left="0px"
+      mouseDiv.style.background="yellow"
+      document.body.addEventListener("mousemove",followmouse, false)
+      document.body.addEventListener("mouseup",dragonlifted, false)
+      //can.addEventListener("mouseup",dragonlifted, false)
+      wrapper.appendChild(mouseDiv)
+      game.appendChild(infoDiv)
+      game.appendChild(can)
+      game.appendChild(menuDiv)
+      wrapper.appendChild(game)
+
+    }
+    function mouseovermenu() {
+      console.log(2)
+      if(this.style != null){
+        this.style.background="white"
+      }
+    }
+    function mouseoutmenu() {
+      if(this.style != null){
+        this.style.background="red"
+      }
+    }
+      function dragonclicked() {
+        selected=this
+        this.style.background="green"
+        console.log(selected.index)
+
+      }
+      function dragonlifted() {
+        if(selected != null){
+          selected.style.background="white"
+          //g.towers[g.towers.length]=new tower(selected.child,mouseX-400,mouseY-200)
+          g.checkmouse(mouseX-400,mouseY-200,selected.child)
+        }
+
+        selected= null
+        console.log(5)
+      }
+      function dragonheld() {
+
+          // this.style.left= mouseX-1400+"px"
+          // this.style.top= mouseY-200+"px"
+
+      }
+
+      function followmouse(event) {
+         mouseX=event.pageX
+         mouseY=event.pageY
+         mouseXX=event.clientX
+         mouseYY=event.clientY
+         button=event.button
+      }
+      function runcanvascode() {
+        canvascode()
+        //console.log(requestAnimationFrame(runcanvascode))
+        requestAnimationFrame(runcanvascode)
+
+      }
+      makeHtml(3,5)
+      ctx= can.getContext('2d')
+      g=new Game()
+      g.load()
+      //document.body.addEventListener("mousemove",g.checkmouse(), false)
+
+      runcanvascode()
+      function canvascode() {
+        ctx.beginPath();
+        ctx.rect(0, 0, 1000, 1000);
+        ctx.fillStyle = "white";
+        ctx.fill()
+        g.run()
+        if (selected != null){
+
+        ctx.drawImage(selected.child,mouseX-400,mouseY-200)
+
+      }
+      }
+      function Game() {
+        this.towers=[]
+        this.bullets=[]
+        this.boids=[]
+        this.grid=[]
+        this.res=100
+        this.maxboids=4
+
+
+        this.run= function() {
+
+          for(var i=0;i<this.grid.length;i++) {
+            this.grid[i].run()
+          }
+
+          // for(var i=0;i<this.towers.length;i++){
+          //   this.towers[i].run()
+          // }
+          //this.pathfinding.visualize()
+          for(var i=0;i<this.boids.length;i++) {
+            this.boids[i].run()
+          }
+          this.bullets[0].run()
+
+        }
+        this.load = function() {
+          for(var x=0;x<can.width;x+=this.res){
+              for(var y=0; y<can.height;y+=this.res){
+                this.grid[this.grid.length] =new Grid(this,x,y)
+              }
+          }
+
+          this.pathfinding = new pathfinding(this,this.grid[12])
+          this.pathfinding.run()
+          console.log(this.pathfinding)
+          for(var i=0;i<this.maxboids;i++){
+            this.boids[i]=new boid(this)
+            this.boids[i].load()
+          }
+          this.bullets[0]= new bullet(this,50,50,this.boids[0])
+        }
+        this.checkmouse = function(x,y,selected) {
+          var pos= new Vector(x,y)
+          console.log(pos)
+          console.log(this.pathfinding);
+          var tile = this.pathfinding.findtilebypos(pos)
+          if (tile){
+            tile.clicked(selected)
+            this.pathfinding.run()
+            if (!this.pathfinding.filled){
+              tile.passable=true
+              this.pathfinding.run()
+            }
+
+          }
+
+
+        }
+      }
+      function meta() {
+        this.runSet = function(array) {
+          for(var i=0;i<array.length;i++) {
+            array[i].run()
+          }
+        }
+        this.deleteElement = function() {
+
+        }
+      }
+      function tower(img,x,y) {
+        this.img=img
+        this.x=x
+        this.y=y
+        this.width=50
+        this.height=50
+        this.angle=Math.random()*6.28
+        this.render= function() {
+          ctx.translate(this.x+this.width/2,this.y+this.height/2)
+          ctx.rotate(this.angle)
+          ctx.rect(-this.width/2,-this.height/2,this.width,this.height)
+          ctx.drawImage(this.img,-this.width/2,-this.height/2,this.width,this.height)
+          ctx.stroke()
+          ctx.rotate(-this.angle)
+          ctx.translate((this.x+this.width/2)*-1,(this.y+this.height/2)*-1)
+
+        }
+        this.run = function() {
+          this.update()
+          this.render()
+        }
+        this.update= function() {
+          this.angle+=Math.random()*.1
+        }
+      }
+      function Grid(game,x,y) {
+        //this is a grid element it defines the background
+        //these are the variablies it contains
+        this.game=game
+        this.pos=new Vector(x,y)
+        this.dis=null
+        this.par=null
+        this.passable=true
+        this.angle=0
+        this.img=null
+        this.height=50
+        this.width=50
+        //this.color=(100,100,100)
+        //this is the run function of the grid element, it is called once every frame
+        this.run = function() {
+          this.update()
+          this.render()
+
+        }
+        this.render = function() {
+          ctx.save()
+
+
+          //console.log(ctx.strokeStyle)
+          ctx.rect(this.pos.x,this.pos.y,this.game.res,this.game.res)
+
+          if (this.passable){
+             ctx.fillStyle="white"
+            // ctx.fill()
+          }
+          else{
+            if(this.img){
+
+              ctx.translate(this.pos.x-this.width/2+this.game.res*3/4,this.pos.y-this.height/2+this.game.res*3/4)
+              ctx.rotate(this.angle)
+              ctx.rect(-this.width/2,-this.height/2,this.width,this.height)
+
+              //ctx.drawImage(this.img,-this.width/2,-this.height/2)
+              //ctx.rotate(-this.angle)
+              //ctx.translate((this.pos.x-this.width/2+this.game.res*3/4)*-1,(this.pos.y-this.height/2+this.game.res*3/4)*-1)
+            }
+            //ctx.fillStyle="black"
+          }
+
+          //ctx.fillRect(this.pos.x,this.pos.y,this.game.res,this.game.res);
+          ctx.stroke()
+          ctx.restore()
+        }
+        this.update = function() {
+          this.angle+=.01
+        }
+        //this is the funtion that is called when one clicks a grid element
+        this.clicked = function(selected) {
+          console.log(selected)
+          this.img=selected
+          console.log(this.img.src)
+          console.log("this tile has been clicked "+this.pos.x,this.pos.y)
+          console.log(this.passable)
+          if (this.passable){
+            this.passable=false
+          }
+          else{
+            this.passable=true
+          }
+        }
+      }
+      //this is the pathfiding class, it contains all the math nessesasry to make pathfinding
+      function pathfinding(game,end) {
+        //game is a refrence to the parent and end is the end grid element
+        this.end=end
+        this.game=game
+        this.filled=false
+        this.appended=[]
+        //find neighbor identifies all the neighbors of a grid element
+        this.findneighbor = function(thing) {
+          //var thing=thing
+          var neighbors=[]
+          //console.log(2)
+          //console.log(game.grid.length)
+
+          // for(var i=0;i< game.grid.length;i++){
+          //   //console.log(game.grid[i].pos.x)
+          //   //console.log(dist(thing.pos.x,thing.pos.y,game.grid[i].pos.x,game.grid[i].pos.y)<=game.res)
+          //   //console.log(thing)
+          //   if(thing.pos.dist(game.grid[i].pos)<=game.res){
+          //     //console.log(4)
+          //     neighbors[neighbors.length]=game.grid[i]
+          //   }
+          // }
+          var n=new Vector(thing.pos.x,thing.pos.y+this.game.res)
+          var s=new Vector(thing.pos.x,thing.pos.y-this.game.res)
+          var e=new Vector(thing.pos.x+this.game.res,thing.pos.y)
+          var w=new Vector(thing.pos.x-this.game.res,thing.pos.y)
+          // console.log(thing.pos)
+          if(this.findtilebypos(n)){
+            neighbors[neighbors.length]=this.findtilebypos(n)
+            // console.log(this.findtilebypos(n).pos.dist(thing.pos)+"n")
+          }
+          if(this.findtilebypos(s)){
+            neighbors[neighbors.length]=this.findtilebypos(s)
+            // console.log(this.findtilebypos(s).pos.dist(thing.pos)+"s")
+          }
+          if(this.findtilebypos(e)){
+            neighbors[neighbors.length]=this.findtilebypos(e)
+            // console.log(this.findtilebypos(e).pos.dist(thing.pos)+"e")
+          }
+          if(this.findtilebypos(w)){
+            neighbors[neighbors.length]=this.findtilebypos(w)
+            // console.log(this.findtilebypos(w).pos.dist(thing.pos)+"w")
+          }
+
+
+          // // this section of code identifies diagonal neighbors and weights them
+          // for(var i=0;i< game.grid.length;i++){
+          //   //console.log(game.grid[i].pos.x)
+          //   //console.log(dist(thing.pos.x,thing.pos.y,game.grid[i].pos.x,game.grid[i].pos.y)<=game.res)
+          //   //console.log(thing)
+          //   if(dist(thing.pos.x,thing.pos.y,game.grid[i].pos.x,game.grid[i].pos.y)>game.res && dist(thing.pos.x,thing.pos.y,game.grid[i].pos.x,game.grid[i].pos.y)<game.res*2){
+          //     //console.log(4)
+          //     append(neighbors,game.grid[i])
+          //   }
+          // }
+          return neighbors
+        }
+        // this is a function that identifies a grid elemtent by x and y positions
+        this.findtilebypos = function(pos) {
+          // console.log(pos)
+          var col=Math.floor((pos.x)/this.game.res)
+          var row=Math.floor((pos.y)/this.game.res)
+          // console.log(pos.x+"  "+pos.y+"x"+col+"y"+row)
+          var maxcols = can.width/this.game.res-1
+          var maxrows = can.height/this.game.res-1
+          var index=(col)*10+row
+          if(index>=0 && index<this.game.grid.length && col<=maxcols && col>=0 && row>=0 && row<=maxrows){
+            return this.game.grid[index]
+          }
+          else {
+            return null
+          }
+
+        }
+        // this is a function that assigns children to a grid element
+        this.findchildren = function(tile) {
+          var currenttile=tile
+
+          var neighbors=this.findneighbor(currenttile)
+          //console.log(neighbors.length)
+          for (var i=0;i<neighbors.length;i++){
+            //console.log(neighbors[i].par)
+            if (neighbors[i].par===null && neighbors[i].passable){
+              neighbors[i].par=currenttile
+              neighbors[i].dis=currenttile.dis+1
+              //console.log(1)
+              this.appended[this.appended.length]=neighbors[i]
+            }
+          }
+
+        }
+        //this is the function that iteretvly tavels through the parent child tree and assigns new children
+        this.run = function() {
+          this.end.dis=0
+          this.end.passable=true
+          console.log("running pathfinding")
+          for(var j=0;j< game.grid.length;j++){
+            game.grid[j].par=null
+          }
+          this.appended=[this.end]
+
+          for(var i=0;i<this.appended.length;i++){
+            this.findchildren(this.appended[i]);
+            // console.log(i)
+          }
+          this.filled=true
+          for(var i=0;i<this.game.grid.length;i++){
+            if(this.game.grid[i].passable && !this.game.grid[i].par){
+              this.filled=false
+
+            }
+          }
+
+          //for(var i=0;i<this.appended)
+          console.log("finished running pathfinding")
+        //this.visualize()
+        }
+        // this a function that shows the parent child relationship
+        this.visualize= function() {
+
+          for(var i=0;i<this.appended.length;i++){
+
+
+            // stroke(200,135,this.appended[i].dis*5);
+            // strokeWeight(5);
+            ctx.beginPath();
+            ctx.strokeStyle="red"
+            ctx.moveTo(this.appended[i].pos.x+game.res/2,this.appended[i].pos.y+game.res/2);
+            ctx.lineTo(this.appended[i].par.pos.x+game.res/2,this.appended[i].par.pos.y+game.res/2);
+            // ctx.moveTo(this.appended[i].par.pos.x+game.res/2,this.appended[i].par.pos.y+game.res/2);
+            // ctx.lineTo(this.appended[i].par.pos.x+game.res/2+10,this.appended[i].par.pos.y+game.res/2-10);
+            // ctx.moveTo(this.appended[i].par.pos.x+game.res/2,this.appended[i].par.pos.y+game.res/2);
+            // ctx.lineTo(this.appended[i].par.pos.x+game.res/2+10,this.appended[i].par.pos.y+game.res/2+10);
+
+            ctx.stroke();
+            //ctx.line(this.appended[i].pos.x+game.res/2,this.appended[i].pos.y+game.res/2,this.appended[i].par.pos.x+game.res/2,this.appended[i].par.pos.y+game.res/2)
+            //console.log(this.appended[i].pos.x+"//"+this.appended[i].par.pos.x)
+            // strokeWeight(1)
+
+          }
+        };
+      }
+      //////////////////////////////////////////////////////////////////////////
+
+      //////////////////////////////////////////////////////////////////////
+      function bullet(game,x,y,target) {
+        this.game=game
+        this.pos=new Vector(x,y)
+        this.vel=new Vector(0,0)
+        this.target=target
+        this.run= function() {
+          this.update()
+          this.render()
+        }
+        this.render = function() {
+          ctx.save()
+          ctx.beginPath();
+          ctx.strokeStyle="blue"
+          ctx.moveTo(this.pos.x,this.pos.y);
+          ctx.lineTo(this.pos.x+this.vel.x,this.pos.y+this.vel.y);
+
+          ctx.stroke();
+          ctx.restore()
+        }
+        this.update = function() {
+          var steer = new Vector(this.target.pos.x-this.pos.x,this.target.pos.y-this.pos.y)
+          steer.normalize()
+          steer.mult(7)
+          this.vel=steer
+          this.pos.add(this.vel)
+          if(this.pos==this.target.pos) {
+
+          }
+
+        }
+      }
+      /////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+      ///////////////////////////////////////////////////////
+      function boid(game) {
+      this.load = function() {
+        this.game=game
+        this.pos=new Vector(Math.random()*can.width,Math.random()*can.height)
+        this.vel=new Vector(0,0)
+        this.par=null
+        //this.parexist=false
+        this.findpar()
+        console.log(this.par)
+      }
+      this.run= function() {
+        this.update()
+        this.render()
+      };
+      this.render = function() {
+        ctx.save()
+
+
+          ctx.rect(this.pos.x,this.pos.y,10,10);
+          ctx.stroke()
+        ctx.restore()
+      };
+      this.update = function() {
+        if ( !(this.pos.x>this.par.pos.x && this.pos.x<=this.par.pos.x+this.game.res && this.pos.y>=this.par.pos.y && this.pos.y<this.par.pos.y+game.res)){
+
+        this.findpar();
+        }
+        //console.log(this.parexist)
+        if(this.par.par != null){
+          var dest = new Vector(this.par.par.pos.x+game.res/2,this.par.par.pos.y+this.game.res/2)
+         var steer=new Vector(dest.x-this.pos.x,dest.y-this.pos.y)
+         steer.normalize()
+         steer.mult(5)
+         this.vel=steer
+         //console.log(steer)
+        }
+        else{
+          if(!this.par.passable){
+            var dest = new Vector(this.par.pos.x+this.game.res/2,this.par.pos.y+this.game.res/2)
+         var steer=new Vector(dest.x-this.pos.x,dest.y-this.pos.y)
+         steer.normalize()
+         steer.mult(-3)
+         this.vel=steer
+          }
+        }
+        this.pos.add(this.vel)
+         if(this.par===this.game.pathfinding.end){
+           this.pos=new Vector(Math.random()*can.width,Math.random()*can.height)
+         }
+      };
+      this.findpar = function() {
+
+        this.par=this.game.pathfinding.findtilebypos(new Vector(this.pos.x,this.pos.y))
+
+        }
+    }
+      function Vector(x,y) {
+        this.x=x
+        this.y=y
+        this.dist = function(other) {
+          return Math.sqrt((this.x-other.x)*(this.x-other.x)+(this.y-other.y)*(this.y-other.y))
+        }
+        this.mult = function(mult) {
+          this.x*=mult
+          this.y*=mult
+        }
+        this.normalize = function(){
+          this.mult(1/this.dist(new Vector(0,0)))
+        }
+        this.add = function(other) {
+          this.y+=other.y
+          this.x+=other.x
+        }
+      }
+
+
+    </script>
+
+  </body>
+
+</html>
